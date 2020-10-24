@@ -39,6 +39,7 @@
 								class="input input__letter"
 								pattern="[^aeiouAEIOU]"
 								:disabled="totalAttemps === usedAttemps || gameover"
+                @keyup="forbitVocals"
 								required
 							/>
 							<button :disabled="totalAttemps === usedAttemps || gameover" class="action action__confirm" @click.prevent="confirm">Controlla</button>
@@ -88,6 +89,7 @@ return {
     letter2check: '',
     goodLetters: [],
     badLetters: [],
+    specialLetters: ['a', 'e', 'i', 'o', 'u'],
     gameover: false,
     totalAttemps: 10,
     usedAttemps: 0,
@@ -127,6 +129,9 @@ return {
       }
       if (this.badLetters.length >= 6) this.gameover = true
       this.letter2check = ''
+    },
+    forbitVocals() {
+      if (this.specialLetters.includes(this.letter2check.toLowerCase())) this.letter2check = ''
     },
     getWords() {
       this.words = this.customText
