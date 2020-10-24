@@ -51,10 +51,10 @@
 					<div class="vocals">
 						<p>oppure compra una vocale:</p>
 						<ul>
-							<li class="vocal">
-								<!-- vocal -->
-							</li>
-						</ul>
+              <li class="vocal" v-for="vocal in specialLetters" :key="vocal">
+                {{ vocal }}
+              </li>
+            </ul>
 						<!-- message tip -->
 					</div>
 				</div>
