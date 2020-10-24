@@ -1,4 +1,8 @@
-# hanged-npm
+# Hanged Game
+
+> Project used during a Vue.js base course
+
+This is the NPM version of the same [game build previously with Vue CDN](https://github.com/lorenaramonda/hanged-cdn)
 
 ## Project setup
 ```
