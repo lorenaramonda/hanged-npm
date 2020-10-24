@@ -15,17 +15,22 @@
 				<div v-if="word2discover" class="words">
 					<p>La parola da indovinare è:</p>
 					<v-word :word="word2discover" :good-letters="goodLetters"></v-word>
-					<form>
-						<!-- input solution -->
-						<!-- button solution -->
+					<form v-if="!gameover" @submit.prevent="guessWord">
+						<input v-if="showSolutionInput" v-model.trim="solution" placeholder="inserisci la soluzione" class="input input__word" />
+						<button class="button button__end">{{ showSolutionInput ? 'Conferma' : 'Do la soluzione' }}</button>
 						<p class="tip">Sblocca i campi sopra e dai la soluzione adesso! Se sbagli, il gioco finisce.</p>
 					</form>
-					<template v-if="gameover">
-						<p><strong>Oh no! HAI PERSO!</strong></p>
-						<p>
-							La parola era <strong>{{ word2discover }}</strong>
-						</p>
-					</template>
+          <div v-else>
+            <template v-if="wordFound">
+              <p><strong>HAI VINTO!</strong> 🎉</p>
+            </template>
+            <template v-else>
+              <p><strong>Oh no! HAI PERSO!</strong></p>
+              <p>
+                La parola era <strong>{{ word2discover }}</strong>
+              </p>
+            </template>
+          </div>
 				</div>
 				<div class="dashboard">
 					<div class="consonants">
@@ -97,6 +102,9 @@ return {
     coinsEarned: 0,
     coinsUsed: 0,
     consToGuess: 3, // setting for consonant to guess to earn one coin
+    solution: '',
+    showSolutionInput: false,
+    wordFound: false
   };
 },
   computed: {
@@ -133,6 +141,9 @@ return {
       this.usedAttemps = 0
       this.gameover = false
       this.coinsUsed = 0
+      this.showSolutionInput = false
+      this.solution = ''
+      this.wordFound = false
       // choose another word
       const randNum = Math.floor(Math.random() * this.words.length)
       this.word2discover = this.words[randNum]
@@ -165,6 +176,17 @@ return {
         .filter(word => word.length > 7)
       this.settingsOpen = false
       this.init()
+    },
+    guessWord() {
+      if (!this.showSolutionInput) {
+        this.showSolutionInput = true
+      } else {
+        if (this.solution && this.solution.toLowerCase() === this.word2discover) {
+          this.wordFound = true
+        }
+        // stop the game
+        this.gameover = true
+      }
     }
   },
 }
