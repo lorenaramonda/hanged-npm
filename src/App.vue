@@ -30,7 +30,7 @@
 				<div class="dashboard">
 					<div class="consonants">
 						<p>Prova con una consonante:</p>
-						<form>
+						<form @submit.prevent="confirm()">
 							<input
 								v-model="letter2check"
 								type="text"
@@ -42,16 +42,16 @@
                 @keyup="forbitVocals"
 								required
 							/>
-							<button :disabled="totalAttemps === usedAttemps || gameover" class="action action__confirm" @click.prevent="confirm">Controlla</button>
+							<button :disabled="totalAttemps === usedAttemps || gameover" class="action action__confirm">Controlla</button>
 						</form>
 						<div class="tip tip__attemps">
 							<p v-html="attempsMessage"></p>
 						</div>
 					</div>
-					<div class="vocals">
+					<div class="vocals" :class="{ 'vocals--allowed': canBuyVocals }">
 						<p>oppure compra una vocale:</p>
 						<ul>
-              <li class="vocal" v-for="vocal in specialLetters" :key="vocal">
+              <li class="vocal" v-for="vocal in specialLetters" :key="vocal" @click="buyVocal(vocal)">
                 {{ vocal }}
               </li>
             </ul>
@@ -95,6 +95,7 @@ return {
     customText: '',
     settingsOpen: false,
     coinsEarned: 0,
+    coinsUsed: 0,
     consToGuess: 3, // setting for consonant to guess to earn one coin
   };
 },
@@ -105,10 +106,16 @@ return {
     attempsMessage() {
       return `Indovina la parola entro <strong>${this.totalAttemps - this.usedAttemps} tentativi</strong>`
     },
+    coinsAvailable() {
+      return this.coinsEarned - this.coinsUsed
+    },
     coins() {
       const str = this.coinsEarned === 1 ? 'moneta' : 'monete'
-      return `${this.coinsEarned} ${str}`
+      return `${this.coinsAvailable} ${str}`
     },
+    canBuyVocals() {
+      return !this.gameover && this.coinsAvailable > 0
+    }
   },
   watch: {
     goodLetters(val) {
@@ -125,13 +132,14 @@ return {
       this.badLetters = []
       this.usedAttemps = 0
       this.gameover = false
+      this.coinsUsed = 0
       // choose another word
       const randNum = Math.floor(Math.random() * this.words.length)
       this.word2discover = this.words[randNum]
     },
-    confirm() {
+    confirm(l = this.letter2check) {
       this.usedAttemps++
-      const letter = this.letter2check.toLowerCase()
+      const letter = l.toLowerCase()
       if (this.word2discover.includes(letter)) {
         if (!this.goodLetters.includes(letter)) this.goodLetters.push(letter) // ensure you only push the same letter once
       } else {
@@ -142,6 +150,12 @@ return {
     },
     forbitVocals() {
       if (this.specialLetters.includes(this.letter2check.toLowerCase())) this.letter2check = ''
+    },
+    buyVocal(vocal) {
+      if (this.canBuyVocals) {
+        this.confirm(vocal)
+        this.coinsUsed++
+      }
     },
     getWords() {
       this.words = this.customText
