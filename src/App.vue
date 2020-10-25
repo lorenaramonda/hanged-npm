@@ -3,7 +3,7 @@
     <div class="game">
 			<div class="game__left">
 				<v-hanged-man :bad-attemps="badLetters.length"></v-hanged-man>
-				<button class="button button__start" @click="init">Ricomincia</button>
+				<button class="button button__start" @click="restart">Ricomincia</button>
 			</div>
 			<div class="game__right">
 				<div class="settings">
@@ -14,7 +14,7 @@
 				</div>
 				<div v-if="word2discover" class="words">
 					<p>La parola da indovinare è:</p>
-					<v-word :word="word2discover" :good-letters="goodLetters"></v-word>
+					<v-word :word="word2discover" :good-letters="wordFound ? solution.split('') : goodLetters" ></v-word>
 					<form v-if="!gameover" @submit.prevent="guessWord">
 						<input v-if="showSolutionInput" v-model.trim="solution" placeholder="inserisci la soluzione" class="input input__word" />
 						<button class="button button__end">{{ showSolutionInput ? 'Conferma' : 'Do la soluzione' }}</button>
@@ -104,7 +104,12 @@ return {
     consToGuess: 3, // setting for consonant to guess to earn one coin
     solution: '',
     showSolutionInput: false,
-    wordFound: false
+    wordFound: false,
+    // thanks to http://soundbible.com/
+    diceSound: new Audio(require('@/assets/sounds/dices.mp3')),
+    tadaSound: new Audio(require('@/assets/sounds/tada.mp3')),
+    chipsSound: new Audio(require('@/assets/sounds/chips.mp3')),
+    sadSound: new Audio(require('@/assets/sounds/sad.mp3')),
   };
 },
   computed: {
@@ -148,6 +153,11 @@ return {
       const randNum = Math.floor(Math.random() * this.words.length)
       this.word2discover = this.words[randNum]
     },
+    restart() {
+      this.$nextTick()
+      this.diceSound.play()
+      this.init()
+    },
     confirm(l = this.letter2check) {
       this.usedAttemps++
       const letter = l.toLowerCase()
@@ -156,7 +166,10 @@ return {
       } else {
         this.badLetters.push(letter)
       }
-      if (this.badLetters.length >= 6) this.gameover = true
+      if (this.badLetters.length >= 6) {
+        this.sadSound.play()
+        this.gameover = true
+      }
       this.letter2check = ''
     },
     forbitVocals() {
@@ -165,6 +178,7 @@ return {
     buyVocal(vocal) {
       if (this.canBuyVocals) {
         this.confirm(vocal)
+        this.chipsSound.play()
         this.coinsUsed++
       }
     },
@@ -183,6 +197,9 @@ return {
       } else {
         if (this.solution && this.solution.toLowerCase() === this.word2discover) {
           this.wordFound = true
+          this.tadaSound.play()
+        } else {
+          this.sadSound.play()
         }
         // stop the game
         this.gameover = true
