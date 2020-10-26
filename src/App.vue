@@ -55,7 +55,7 @@
                 {{ vocal }}
               </li>
             </ul>
-						<!-- message tip -->
+						<p class="tip">Compra una vocale con le monete accumulate! Ogni {{ consToGuess }} consonanti indovinate, guadagni una lettera!</p>
 					</div>
 				</div>
 			</div>
@@ -83,7 +83,6 @@ export default {
   },
   data: function() {
 return {
-    coins: '0 monete',
     words: ['stupendo', 'magnifico', 'meraviglioso', 'incredibile','fantastico'],
     word2discover: '',
     letter2check: '',
@@ -94,7 +93,9 @@ return {
     totalAttemps: 10,
     usedAttemps: 0,
     customText: '',
-    settingsOpen: false
+    settingsOpen: false,
+    coinsEarned: 0,
+    consToGuess: 3, // setting for consonant to guess to earn one coin
   };
 },
   computed: {
@@ -103,6 +104,15 @@ return {
     },
     attempsMessage() {
       return `Indovina la parola entro <strong>${this.totalAttemps - this.usedAttemps} tentativi</strong>`
+    },
+    coins() {
+      const str = this.coinsEarned === 1 ? 'moneta' : 'monete'
+      return `${this.coinsEarned} ${str}`
+    },
+  },
+  watch: {
+    goodLetters(val) {
+      this.coinsEarned = parseInt(val.filter(l => !this.specialLetters.includes(l)).length / this.consToGuess, 0)
     }
   },
   created() {
@@ -123,7 +133,7 @@ return {
       this.usedAttemps++
       const letter = this.letter2check.toLowerCase()
       if (this.word2discover.includes(letter)) {
-        if (!this.goodLetters.includes(letter)) this.goodLetters.push(letter)
+        if (!this.goodLetters.includes(letter)) this.goodLetters.push(letter) // ensure you only push the same letter once
       } else {
         this.badLetters.push(letter)
       }
